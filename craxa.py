@@ -1,52 +1,40 @@
-import customtkinter as ctk
+import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-import os
-from datetime import datetime
-from tkinter import filedialog, messagebox
- 
-class GeradorCracha:
-    def __init__(self):
-        self.root = ctk.CTk()
-        self.root.title("Gerador de Crachás - Aura Apoena")
-        self.root.geometry("500x700")
-        # Variáveis de controle
-        self.caminho_foto = ""
-        # Interface - Campos de Texto
-        self.criar_campo("Nome Completo:", "entry_nome")
-        self.criar_campo("CPF:", "entry_cpf")
-        self.criar_campo("Empresa:", "entry_empresa")
-        self.criar_campo("Gerência:", "entry_gerencia")
-        self.criar_campo("Função:", "entry_funcao")
-        self.criar_campo("Treinamentos (Ex: NR10: 01/01/2026, NR35: 02/02/2026):", "entry_nrs")
- 
-        # Botão para Foto
-        self.btn_foto = ctk.CTkButton(self.root, text="Carregar Foto", command=self.selecionar_foto)
-        self.btn_foto.pack(pady=10)
- 
-        # Botão Gerar
-        self.btn_gerar = ctk.CTkButton(self.root, text="GERAR CRACHÁ", fg_color="green", command=self.processar_cracha)
-        self.btn_gerar.pack(pady=20)
- 
-    def criar_campo(self, label_text, var_name):
-        label = ctk.CTkLabel(self.root, text=label_text)
-        label.pack(pady=(10, 0))
-        entry = ctk.CTkEntry(self.root, width=300)
-        entry.pack()
-        setattr(self, var_name, entry)
- 
-    def selecionar_foto(self):
-        self.caminho_foto = filedialog.askopenfilename(filetypes=[("Imagens", "*.jpg *.png")])
-        if self.caminho_foto:
-            messagebox.showinfo("Sucesso", "Foto carregada!")
- 
-    def processar_cracha(self):
-        # Aqui entra a lógica de desenho na imagem (Pillow)
-        # 1. Abre o template 
-        # 2. Escreve Nome, CPF, Empresa, Gerência, Função 
-        # 3. Filtra os treinamentos digitados (só escreve se a data for futura)
-        # 4. Salva o PNG
-        messagebox.showinfo("Sucesso", "Crachá gerado na pasta /CRACHAS")
- 
-if __name__ == "__main__":
-    app = GeradorCracha()
-    app.root.mainloop()
+import io
+
+st.set_page_config(page_title="Gerador de Crachás - Aura Apoena")
+
+st.title("🪪 Gerador de Crachás - Aura Apoena")
+
+# Interface do Streamlit (Substitui o CustomTkinter)
+nome = st.text_input("Nome Completo:")
+cpf = st.text_input("CPF:")
+empresa = st.text_input("Empresa:")
+gerencia = st.text_input("Gerência:")
+funcao = st.text_input("Função:")
+nrs = st.text_area("Treinamentos (Ex: NR10: 01/01/2026):")
+
+foto = st.file_uploader("Carregar Foto", type=["jpg", "png"])
+
+if st.button("GERAR CRACHÁ"):
+    if nome and foto:
+        # Lógica de processamento com Pillow
+        img = Image.open(foto)
+        # ... aqui você insere sua lógica de desenho (ImageDraw) ...
+        
+        st.success(f"Crachá de {nome} gerado com sucesso!")
+        
+        # Exemplo de como mostrar/baixar o resultado no navegador
+        st.image(img, caption="Prévia do Crachá", width=300)
+        
+        # Botão de download
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        st.download_button(
+            label="Baixar Crachá",
+            data=buf.getvalue(),
+            file_name=f"cracha_{nome}.png",
+            mime="image/png"
+        )
+    else:
+        st.error("Por favor, preencha o nome e carregue uma foto.")
